@@ -26,6 +26,11 @@ router.post('/send', [
         });
 
         await newMessage.save();
+        
+        // Emit message via Socket.io
+        const io = req.app.get('socketio');
+        io.emit('receiveMessage', newMessage);
+
         res.status(201).json(newMessage);
     } catch (error) {
         console.error(error.message);

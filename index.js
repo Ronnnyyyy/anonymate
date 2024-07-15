@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
 const connectToMongo = require('./db.js');
 const cors = require('cors');
 
@@ -17,12 +19,23 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/chat', require('./routes/chat'));
 
-// Error handling
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Internal Server Error');
+// Create HTTP server and integrate Socket.io
+const server = http.createServer(app);
+const io = socketIo(server);
+
+io.on('connection', (socket) => {
+    console.log('New client connected');
+
+    socket.on('sendMessage', (message) => {
+        io.emit('receiveMessage', message);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
 });
 
-app.listen(port, () => {
+// Start server
+server.listen(port, () => {
     console.log(`The app is running on http://localhost:${port}`);
 });
