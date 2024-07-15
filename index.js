@@ -1,14 +1,28 @@
+require('dotenv').config();
 const express = require('express');
 const connectToMongo = require('./db.js');
-
-connectToMongo();
+const cors = require('cors');
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
-app.use('/api/auth',require('./routes/auth'));
-app.use('/api/chat',require('./routes/chat'));
+// Connect to MongoDB
+connectToMongo();
 
-app.listen(port,()=>{
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/chat', require('./routes/chat'));
+
+// Error handling
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Internal Server Error');
+});
+
+app.listen(port, () => {
     console.log(`The app is running on http://localhost:${port}`);
 });

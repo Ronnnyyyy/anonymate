@@ -6,9 +6,7 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const fetchuser = require('../middleware/fetchuser.js');
 
-//todo Set some secret sign
-
-const JWT_SIGN = "secretsign";
+const JWT_SIGN = process.env.JWT_SIGN;
 
 // Router 1 (Creating user) - No login required
 
@@ -97,7 +95,7 @@ router.post('/login', [
 router.post('/getuser', fetchuser, async (req,res) =>{
     try{
         const userId = req.user.id;
-        const user = await User.findById(usedId).select('-password');
+        const user = await User.findById(userId).select('-password');
         res.json(user);
     } catch (error) {
         console.error(error.message);
